@@ -37,8 +37,9 @@ rest of the word follows at 0.80 or better once it is down.
 
 Two short clips of the session, recorded against the current code:
 
-- [`docs/session-whats-up.mp4`](docs/session-whats-up.mp4) — `whats up` -> `what up .`
-- [`docs/session-who-are-you.mp4`](docs/session-who-are-you.mp4) — `who are you?` -> `is a man .`
+![a session answering "whats up" with "what up ."](docs/session-whats-up.gif)
+
+![a session answering "who are you?" with "is a man ."](docs/session-who-are-you.gif)
 
 Both show the loop doing what it is built to do and answering badly, which is the
 honest state of it on open-ended questions: the classifier is picking the most
