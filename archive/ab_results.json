@@ -1,0 +1,204 @@
+[
+ {
+  "arm": "gate",
+  "question": "what is the capital of france",
+  "expected": "paris",
+  "text": "cap t al e s a s a r a a ",
+  "correct": false,
+  "reason": "max_chars",
+  "length": 25,
+  "requests": 50,
+  "p_stop_unfinished": 0.0692,
+  "p_stop_complete": NaN,
+  "steps": [
+   {
+    "i": 0,
+    "char": "c",
+    "stop": 0.01,
+    "top5": "c=0.36 p=0.30 w=0.09 a=0.08 t=0.03"
+   },
+   {
+    "i": 1,
+    "char": "a",
+    "stop": 0.01,
+    "top5": "a=0.66 o=0.12 e=0.06 space=0.05 i=0.03"
+   },
+   {
+    "i": 2,
+    "char": "p",
+    "stop": 0.02,
+    "top5": "p=0.44 space=0.23 r=0.07 l=0.05 s=0.04"
+   },
+   {
+    "i": 3,
+    "char": " ",
+    "stop": 0.03,
+    "top5": "space=0.56 i=0.13 e=0.10 t=0.07 a=0.05"
+   },
+   {
+    "i": 4,
+    "char": "t",
+    "stop": 0.03,
+    "top5": "t=0.16 a=0.11 p=0.09 s=0.09 n=0.08"
+   },
+   {
+    "i": 5,
+    "char": " ",
+    "stop": 0.03,
+    "top5": "space=0.30 i=0.13 a=0.12 e=0.09 h=0.09"
+   },
+   {
+    "i": 6,
+    "char": "a",
+    "stop": 0.03,
+    "top5": "a=0.16 t=0.12 o=0.11 i=0.08 p=0.07"
+   },
+   {
+    "i": 7,
+    "char": "l",
+    "stop": 0.02,
+    "top5": "l=0.53 space=0.19 i=0.05 t=0.03 n=0.03"
+   },
+   {
+    "i": 8,
+    "char": " ",
+    "stop": 0.07,
+    "top5": "space=0.75 e=0.06 a=0.05 l=0.03 i=0.03"
+   },
+   {
+    "i": 9,
+    "char": "e",
+    "stop": 0.04,
+    "top5": "e=0.12 s=0.10 l=0.09 n=0.09 o=0.08"
+   },
+   {
+    "i": 10,
+    "char": " ",
+    "stop": 0.08,
+    "top5": "space=0.69 s=0.06 c=0.03 n=0.03 p=0.03"
+   },
+   {
+    "i": 11,
+    "char": "s",
+    "stop": 0.06,
+    "top5": "s=0.31 r=0.10 e=0.07 p=0.07 o=0.05"
+   },
+   {
+    "i": 12,
+    "char": " ",
+    "stop": 0.18,
+    "top5": "space=0.70 e=0.05 i=0.05 a=0.04 c=0.03"
+   },
+   {
+    "i": 13,
+    "char": "a",
+    "stop": 0.1,
+    "top5": "a=0.20 i=0.11 c=0.08 p=0.07 o=0.07"
+   },
+   {
+    "i": 14,
+    "char": " ",
+    "stop": 0.08,
+    "top5": "space=0.34 s=0.11 r=0.08 t=0.06 l=0.06"
+   },
+   {
+    "i": 15,
+    "char": "s",
+    "stop": 0.08,
+    "top5": "s=0.14 n=0.09 a=0.08 r=0.07 p=0.07"
+   },
+   {
+    "i": 16,
+    "char": " ",
+    "stop": 0.19,
+    "top5": "space=0.57 a=0.11 p=0.04 e=0.03 c=0.03"
+   },
+   {
+    "i": 17,
+    "char": "a",
+    "stop": 0.15,
+    "top5": "a=0.15 p=0.14 r=0.08 e=0.07 l=0.07"
+   },
+   {
+    "i": 18,
+    "char": " ",
+    "stop": 0.05,
+    "top5": "space=0.45 s=0.10 t=0.07 r=0.06 n=0.04"
+   },
+   {
+    "i": 19,
+    "char": "r",
+    "stop": 0.07,
+    "top5": "r=0.11 p=0.11 t=0.09 e=0.08 s=0.08"
+   },
+   {
+    "i": 20,
+    "char": " ",
+    "stop": 0.12,
+    "top5": "space=0.55 c=0.07 a=0.06 e=0.05 t=0.03"
+   },
+   {
+    "i": 21,
+    "char": "a",
+    "stop": 0.09,
+    "top5": "a=0.24 e=0.13 c=0.10 p=0.06 s=0.06"
+   },
+   {
+    "i": 22,
+    "char": " ",
+    "stop": 0.06,
+    "top5": "space=0.40 t=0.07 c=0.06 p=0.06 a=0.05"
+   },
+   {
+    "i": 23,
+    "char": "a",
+    "stop": 0.08,
+    "top5": "a=0.16 p=0.13 s=0.10 e=0.07 t=0.07"
+   },
+   {
+    "i": 24,
+    "char": " ",
+    "stop": 0.05,
+    "top5": "space=0.46 a=0.15 s=0.07 c=0.04 r=0.03"
+   }
+  ]
+ },
+ {
+  "arm": "gate",
+  "question": "what is your name",
+  "expected": "jev",
+  "text": "jev.",
+  "correct": true,
+  "reason": "stop",
+  "length": 4,
+  "requests": 7,
+  "p_stop_unfinished": 0.02333333333333333,
+  "p_stop_complete": 0.67,
+  "steps": [
+   {
+    "i": 0,
+    "char": "j",
+    "stop": 0.01,
+    "top5": "j=0.55 i=0.12 w=0.07 a=0.06 m=0.05"
+   },
+   {
+    "i": 1,
+    "char": "e",
+    "stop": 0.03,
+    "top5": "e=0.98 v=0.01 space=0.01 q=0.00 t=0.00"
+   },
+   {
+    "i": 2,
+    "char": "v",
+    "stop": 0.03,
+    "top5": "v=0.98 space=0.02 p=0.00 f=0.00 l=0.00"
+   },
+   {
+    "i": 3,
+    "char": ".",
+    "stop": 0.67,
+    "top5": ""
+   }
+  ]
+ }
+]

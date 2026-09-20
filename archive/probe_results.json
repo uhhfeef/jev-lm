@@ -1,0 +1,86 @@
+{
+ "probes": [
+  {
+   "question": "what is the capital of france",
+   "text": "",
+   "complete": false
+  },
+  {
+   "question": "what is the capital of france",
+   "text": "par",
+   "complete": false
+  },
+  {
+   "question": "what is the capital of france",
+   "text": "paris is",
+   "complete": false
+  },
+  {
+   "question": "what is the capital of france",
+   "text": "paris",
+   "complete": true
+  },
+  {
+   "question": "what is the capital of france",
+   "text": "the capital of france is paris",
+   "complete": true
+  },
+  {
+   "question": "what is your name",
+   "text": "je",
+   "complete": false
+  },
+  {
+   "question": "what is your name",
+   "text": "jev",
+   "complete": true
+  },
+  {
+   "question": "what is your name",
+   "text": "my name is jev",
+   "complete": true
+  }
+ ],
+ "scores": {
+  "gate": [
+   0.01,
+   0.02,
+   0.14,
+   0.77,
+   0.89,
+   0.03,
+   0.7,
+   0.9
+  ],
+  "parallel": [
+   0.01,
+   0.03,
+   0.16,
+   0.78,
+   0.9,
+   0.03,
+   0.65,
+   0.9
+  ],
+  "symbol": [
+   0.01,
+   0.0,
+   0.02666666666666667,
+   0.9500000000000001,
+   0.9766666666666666,
+   0.0,
+   0.9166666666666666,
+   0.9866666666666667
+  ],
+  "symbol+": [
+   0.005025125628140704,
+   0.0,
+   0.013513513513513514,
+   0.904761904761905,
+   0.9543973941368077,
+   0.0,
+   0.846153846153846,
+   0.9736842105263159
+  ]
+ }
+}

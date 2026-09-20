@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jev-lm"
+version = "0.1.0"
+description = "A character-level language model built on Jev, a System One classifier"
+requires-python = ">=3.11"
+dependencies = [
+    "typesafe-sdk",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+experiments = ["matplotlib"]
+dev = ["pytest"]
+
+[project.scripts]
+jev-lm = "jev_lm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

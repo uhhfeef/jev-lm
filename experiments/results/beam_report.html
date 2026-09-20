@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>Beam Search Verdict</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --paper: #f6f7f9;
+    --surface: #ffffff;
+    --ink: #11161d;
+    --muted: #5c6672;
+    --line: #dce1e8;
+    --line-soft: #eaeef3;
+    --greedy: #c2410c;
+    --beam: #1d4ed8;
+    --hit: #15803d;
+    --miss: #b42318;
+    --hit-bg: #e8f5ec;
+    --miss-bg: #fdeceb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1116;
+      --surface: #151a21;
+      --ink: #e7ebf0;
+      --muted: #94a0ad;
+      --line: #28303a;
+      --line-soft: #1e242c;
+      --greedy: #fb923c;
+      --beam: #7ea2ff;
+      --hit: #4ade80;
+      --miss: #fb7185;
+      --hit-bg: #14301f;
+      --miss-bg: #34161a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1116;
+    --surface: #151a21;
+    --ink: #e7ebf0;
+    --muted: #94a0ad;
+    --line: #28303a;
+    --line-soft: #1e242c;
+    --greedy: #fb923c;
+    --beam: #7ea2ff;
+    --hit: #4ade80;
+    --miss: #fb7185;
+    --hit-bg: #14301f;
+    --miss-bg: #34161a;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    padding-block: 40px 72px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  .prose { max-width: 66ch; }
+
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.02em; text-wrap: balance; }
+  h2 { font-size: 21px; margin: 0 0 12px; letter-spacing: -0.01em; text-wrap: balance; }
+  h3 { font-size: 16px; margin: 0 0 6px; }
+  p { margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  .eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--muted); margin: 0 0 14px;
+  }
+
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--miss);
+    border-radius: 3px;
+    padding: 22px 24px;
+  }
+  .verdict h2 { color: var(--miss); }
+  .scoreline {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px; color: var(--muted); margin-top: 14px;
+    display: flex; flex-wrap: wrap; gap: 8px 22px;
+  }
+  .scoreline b { color: var(--ink); font-weight: 700; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+  th {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--line);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  td.out { font-family: "JetBrains Mono", ui-monospace, monospace; white-space: pre; }
+  .arm { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; font-weight: 500; }
+  .arm.g { color: var(--greedy); }
+  .arm.b { color: var(--beam); }
+  .tag {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; padding: 2px 7px; border-radius: 2px; font-weight: 500;
+  }
+  .tag.hit { background: var(--hit-bg); color: var(--hit); }
+  .tag.miss { background: var(--miss-bg); color: var(--miss); }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 14px; }
+  figure img { display: block; width: 100%; height: auto; border-radius: 2px; }
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 12px; max-width: 70ch; }
+
+  /* character traces: the page's subject is one character at a time, so show it that way */
+  .trace { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 16px; }
+  .trace-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+    margin-bottom: 14px; font-size: 13px; color: var(--muted);
+  }
+  .chars { display: flex; flex-wrap: wrap; gap: 3px; }
+  .ch { width: 26px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .ch .bar { width: 100%; height: 40px; background: var(--line-soft); border-radius: 1px; display: flex; align-items: flex-end; overflow: hidden; }
+  .ch .fill { width: 100%; border-radius: 1px 1px 0 0; }
+  .ch .g { background: var(--greedy); }
+  .ch .b { background: var(--beam); }
+  .ch .lbl {
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px;
+    color: var(--ink); font-weight: 500;
+  }
+  .ch.low .lbl { color: var(--miss); }
+  .ch .sp { color: var(--muted); }
+
+  .finding { background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 20px 22px; }
+  .finding .eyebrow { margin-bottom: 8px; }
+  code {
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.89em;
+    background: var(--line-soft); padding: 1px 5px; border-radius: 2px;
+  }
+  hr { border: none; border-top: 1px solid var(--line); margin: 0; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  ul { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">jev-llm · A/B · 20 Sep 2026 · 129 requests</p>
+    <h1>Beam search does not fix it</h1>
+    <p class="prose" style="color:var(--muted); font-size:17px;">
+      Keeping three candidate answers alive cost 3.6&times; the requests and got exactly
+      the same one question right. Two upstream bugs turned out to matter more.
+    </p>
+  </header>
+
+  <section class="verdict">
+    <h2>Verdict: rejected</h2>
+    <p class="prose">
+      The criteria were set before the run: beam search wins only if <code>washington</code>
+      appears where greedy produced garbage, <em>and</em> the short-answer control does not
+      regress. Neither arm ever reached <code>washington</code>. Beam search also made the
+      <code>jupiter</code> answer measurably worse.
+    </p>
+    <div class="scoreline">
+      <span>greedy <b>1/3</b> correct · <b>28</b> requests</span>
+      <span>beam&nbsp;3 <b>1/3</b> correct · <b>101</b> requests</span>
+      <span>cost <b>3.6&times;</b> · benefit <b>none</b></span>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Results</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Arm</th><th>Question</th><th>Expected</th><th>Output</th><th>Req</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="arm g">greedy</td><td>capital of united states</td><td>washington</td><td class="out">capital ca p .</td><td class="num">14</td><td><span class="tag miss">miss</span></td></tr>
+          <tr><td class="arm g">greedy</td><td>capital of france</td><td>paris</td><td class="out">paris.</td><td class="num">6</td><td><span class="tag hit">hit</span></td></tr>
+          <tr><td class="arm g">greedy</td><td>largest planet</td><td>jupiter</td><td class="out">jev pa .</td><td class="num">8</td><td><span class="tag miss">miss</span></td></tr>
+          <tr><td class="arm b">beam 3</td><td>capital of united states</td><td>washington</td><td class="out">capital .</td><td class="num">42</td><td><span class="tag miss">miss</span></td></tr>
+          <tr><td class="arm b">beam 3</td><td>capital of france</td><td>paris</td><td class="out">paris.</td><td class="num">18</td><td><span class="tag hit">hit</span></td></tr>
+          <tr><td class="arm b">beam 3</td><td>largest planet</td><td>jupiter</td><td class="out">jev jev jev jev .</td><td class="num">41</td><td><span class="tag miss">miss</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr>
+
+  <section class="prose">
+    <p class="eyebrow">Finding 1 — the decisive one</p>
+    <h2>The identity field is teaching it to spell <code>jev</code></h2>
+    <p>
+      Both arms answered <em>largest planet</em> with <code>jev</code>. Every character
+      request carries <code>about_you</code>, which reads
+      <em>&ldquo;Your name is Jev &mdash; spelled j, e, v.&rdquo;</em>
+    </p>
+    <p>
+      <code>jupiter</code> and <code>jev</code> share a first letter. At step&nbsp;0 the model
+      scored <code>j=0.41</code> over <code>p=0.25</code> — reasonable either way. At step&nbsp;1
+      it took <code>e=0.35</code> over <code>u=0.15</code>, and the answer was gone. The spelling
+      is sitting right there in the state, on every single call.
+    </p>
+    <p>
+      Beam&nbsp;3 made this worse rather than better: with four <code>jev</code>-prefixed branches
+      all scoring well, it produced <code>jev jev jev jev .</code> — beam search faithfully
+      amplifying a contaminated distribution.
+    </p>
+  </section>
+
+  <div class="trace">
+    <div class="trace-head">
+      <strong style="color:var(--greedy)">greedy</strong>
+      <span>largest planet &rarr;</span>
+      <code>jev pa .</code>
+      <span class="tag miss">miss</span>
+    </div>
+    <div class="chars" id="t-jup-g"></div>
+  </div>
+
+  <div class="trace">
+    <div class="trace-head">
+      <strong style="color:var(--beam)">beam 3</strong>
+      <span>largest planet &rarr;</span>
+      <code>jev jev jev jev .</code>
+      <span class="tag miss">miss</span>
+    </div>
+    <div class="chars" id="t-jup-b"></div>
+  </div>
+
+  <hr>
+
+  <section class="prose">
+    <p class="eyebrow">Finding 2</p>
+    <h2>Mean log probability makes beams stop early</h2>
+    <p>
+      Beams rank by <code>logprob / steps<sup>1.0</sup></code> — the mean. Stopping is
+      cheap under that rule: a short answer made of confident characters beats a long one
+      that must pay for every uncertain step it takes.
+    </p>
+    <p>
+      Both arms spelled <code>capital&nbsp;</code> cleanly and confidently
+      (<code>l=0.83</code>, then <code>space=0.93</code>). Then the distribution went flat.
+      Greedy stumbled on for six more characters; beam&nbsp;3 took <code>STOP</code> at
+      <code>0.14</code> — the single highest option — and declared <code>capital .</code>
+      finished. It spent 42 requests to produce a shorter wrong answer than greedy's 14.
+    </p>
+  </section>
+
+  <div class="trace">
+    <div class="trace-head">
+      <strong style="color:var(--greedy)">greedy</strong>
+      <span>capital of united states &rarr;</span>
+      <code>capital ca p .</code>
+      <span class="tag miss">miss</span>
+    </div>
+    <div class="chars" id="t-was-g"></div>
+  </div>
+
+  <div class="trace">
+    <div class="trace-head">
+      <strong style="color:var(--beam)">beam 3</strong>
+      <span>capital of united states &rarr;</span>
+      <code>capital .</code>
+      <span class="tag miss">miss</span>
+    </div>
+    <div class="chars" id="t-was-b"></div>
+  </div>
+
+  <hr>
+
+  <section class="prose">
+    <p class="eyebrow">Finding 3 — against my own prediction</p>
+    <h2>The trap this test was built for never happened</h2>
+    <p>
+      The case for beam search was the <code>was</code> &rarr; <code>washington</code> trap:
+      a partial word that is itself a real word, where the space scored 0.87 against 0.05
+      for the letter that continues the real answer.
+    </p>
+    <p>
+      In this run neither arm got that far. Both wrote <code>capital&nbsp;</code> and stalled
+      on the flat step after it — <code>c=0.21, STOP=0.16, a=0.12, n=0.08</code>. The
+      mechanism beam search was supposed to repair never arose, so this test does not
+      actually falsify it. What it establishes is narrower and still decisive: on the
+      questions that <em>do</em> fail today, beam search costs 3.6&times; and changes nothing.
+    </p>
+  </section>
+
+  <hr>
+
+  <section>
+    <p class="eyebrow">Charts</p>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <figure>
+        <img src="chart_logprob.png" alt="Cumulative mean log probability per character, greedy versus beam 3, for all three questions.">
+        <figcaption>
+          Cumulative mean log probability. Higher means a model that knows what it is writing.
+          Both arms climb on <code>paris</code> and sag on the other two — beam&nbsp;3 sits
+          slightly higher throughout (−0.649 against −0.788) while being no more correct,
+          which is the clearest sign the metric and the goal have come apart.
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="chart_certainty.png" alt="Probability of the character actually chosen at each position, greedy versus beam 3.">
+        <figcaption>
+          Probability of the character actually taken, per position. The dips are where the
+          loop is guessing. Note <code>washington</code>: both arms hold above 0.4 through
+          <code>capital</code>, then fall off a cliff at position 8 and never recover.
+        </figcaption>
+      </figure>
+      <figure>
+        <img src="chart_cost.png" alt="Requests per answer for each question, greedy versus beam 3, labelled hit or miss.">
+        <figcaption>
+          What the extra requests bought. The only hit in the experiment, <code>paris</code>,
+          cost 6 requests greedy and 18 with beams — three times the price for the identical
+          six-character answer.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr>
+
+  <section class="prose">
+    <p class="eyebrow">What to do next</p>
+    <h2>Fix the state before buying more search</h2>
+    <ul>
+      <li><strong>Stop shipping the spelling.</strong> Send <code>about_you</code> only when
+        the question is actually about the model, or drop the <em>&ldquo;spelled j, e, v&rdquo;</em>
+        clause. Free, and it is the difference between <code>jev</code> and <code>jupiter</code>.</li>
+      <li><strong>Re-test the trap directly.</strong> Use a question whose answer contains a
+        word-prefix trap and that the loop can actually reach — the united-states question
+        dies before it gets there.</li>
+      <li><strong>If beams come back, tune the length penalty.</strong> At 1.0 they are biased
+        toward stopping; below 1.0 they favour longer answers.</li>
+    </ul>
+    <p style="color:var(--muted); font-size:14px;">
+      Beam search is not disproven — it was never reached by the failure it was built for.
+      It is simply not the next thing to pay for.
+    </p>
+  </section>
+
+</div>
+
+<script>
+  // Each trace is [character, probability of that character]. Rendering them as bars
+  // keeps the unit of the experiment - one character - visible as the unit of the page.
+  const TRACES = {
+    "t-jup-g": [["j",.41],["e",.35],["v",.79],[" ",.55],["p",.20],["a",.27],[" ",.30],[".",.12]],
+    "t-jup-b": [["j",.36],["e",.35],["v",.85],[" ",.55],["j",.13],["e",.41],["v",.67],[" ",.70],
+                ["j",.18],["e",.29],["v",.71],[" ",.71],["j",.20],["e",.49],["v",.69],[" ",.52],[".",.20]],
+    "t-was-g": [["c",.54],["a",.41],["p",.53],["i",.36],["t",.64],["a",.68],["l",.83],[" ",.93],
+                ["c",.21],["a",.32],[" ",.36],["p",.19],[" ",.29],[".",.16]],
+    "t-was-b": [["c",.54],["a",.42],["p",.42],["i",.35],["t",.67],["a",.63],["l",.82],[" ",.94],[".",.14]]
+  };
+
+  for (const [id, steps] of Object.entries(TRACES)) {
+    const host = document.getElementById(id);
+    if (!host) continue;
+    const tone = id.endsWith("-b") ? "b" : "g";
+    for (const [ch, p] of steps) {
+      const cell = document.createElement("div");
+      cell.className = "ch" + (p < 0.25 ? " low" : "");
+      cell.title = (ch === " " ? "space" : ch) + " — p=" + p.toFixed(2);
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("div");
+      fill.className = "fill " + tone;
+      fill.style.height = Math.max(3, Math.round(p * 40)) + "px";
+      bar.appendChild(fill);
+
+      const lbl = document.createElement("div");
+      lbl.className = "lbl";
+      if (ch === " ") { lbl.innerHTML = '<span class="sp">␣</span>'; }
+      else { lbl.textContent = ch; }
+
+      cell.appendChild(bar);
+      cell.appendChild(lbl);
+      host.appendChild(cell);
+    }
+  }
+</script>
+</body>
+</html>
