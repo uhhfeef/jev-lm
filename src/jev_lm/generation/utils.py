@@ -1,4 +1,5 @@
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from typesafe_sdk import TypeSafeClient
@@ -41,6 +42,7 @@ def generate(
     ensemble: int = 3,
     beam_width: int = 1,
     length_penalty: float = 0.7,
+    on_char: Callable[[str], None] | None = None,
 ) -> Run:
     """Run the autoregressive loop until the model stops or the budget is spent.
 
@@ -48,7 +50,7 @@ def generate(
     2. Ask for the distribution over the 28 options -- one request per step.
     3. Each question is asked `ensemble` times over reshuffled options, averaged.
     4. Take the most probable option -> append its character, or stop on STOP.
-    5. Record the step and print it unless `quiet`.
+    5. Record the step, hand the character to `on_char`, print it unless `quiet`.
     6. Stop on STOP or after `max_chars` steps.
 
     Above `beam_width` 1 this hands off to `beam_search`.
@@ -65,4 +67,5 @@ def generate(
     return greedy_search(
         client, question, rng,
         max_chars=max_chars, quiet=quiet, window=window, ensemble=ensemble,
+        on_char=on_char,
     )
