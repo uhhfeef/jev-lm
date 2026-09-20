@@ -33,6 +33,19 @@ jev> paris.
 The first character is the hardest one: `p` leads a-w-t-c by six points and the
 rest of the word follows at 0.80 or better once it is down.
 
+## Demos
+
+Two short clips of the session, recorded against the current code:
+
+- [`docs/session-whats-up.mp4`](docs/session-whats-up.mp4) — `whats up` -> `what up .`
+- [`docs/session-who-are-you.mp4`](docs/session-who-are-you.mp4) — `who are you?` -> `is a man .`
+
+Both show the loop doing what it is built to do and answering badly, which is the
+honest state of it on open-ended questions: the classifier is picking the most
+plausible next character, and with nothing factual to anchor on it drifts into a
+near-echo of the question. The closed questions in the traces above are where it
+holds up.
+
 ## What makes it work
 
 **Options are hypotheses, not symbols.** Each option is the text you would have
