@@ -50,14 +50,8 @@ def generate(
     2. Ask for the distribution over the 28 options -- one request per step.
     3. Each question is asked `ensemble` times over reshuffled options, averaged.
     4. Take the most probable option -> append its character, or stop on STOP.
-    5. Record the step and print it unless `quiet`.
+    5. Record the step, hand the character to `on_char`, print it unless `quiet`.
     6. Stop on STOP or after `max_chars` steps.
-
-    `on_char` is called with each character the moment it is appended, so a caller
-    can stream the answer out as it is written. It is separate from `quiet`: `quiet`
-    controls the diagnostic line carrying the distribution, `on_char` carries only
-    the character. Beam search takes no callback -- the leading candidate can change
-    after a character would have been printed, so there is nothing honest to stream.
 
     Above `beam_width` 1 this hands off to `beam_search`.
     """

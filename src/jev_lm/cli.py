@@ -1,6 +1,8 @@
 import argparse
 import random
 
+from typesafe_sdk import TypeSafeClient
+
 from .client import build_client
 from .generation import Run, generate
 
@@ -10,17 +12,13 @@ BANNER = "ask a question. blank line to skip, 'exit' or ctrl-c to leave."
 
 
 def ask(
-    client, question: str, rng: random.Random, args: argparse.Namespace
+    client: TypeSafeClient,
+    question: str,
+    rng: random.Random,
+    args: argparse.Namespace,
 ) -> Run:
-    """Answer one question and print it as it is written.
-
-    The answer streams character by character on one line, which is the whole
-    reason the loop is worth watching: you see the model spell a word out and
-    stop. Two cases cannot stream and print the finished answer instead --
-    `--verbose`, whose per-character diagnostics would land in the middle of it,
-    and beam search, where the leading candidate can still change after a
-    character would have gone out.
-    """
+    # --verbose interleaves diagnostics, and beam search can still change its
+    # leading candidate, so neither streams; both print the finished answer
     stream = args.beam_width == 1 and not args.verbose
     if stream:
         print(REPLY, end="", flush=True)
@@ -45,18 +43,9 @@ def ask(
     return run
 
 
-def repl(client, rng: random.Random, args: argparse.Namespace) -> None:
-    """Read a question, answer it, repeat, on one client for the whole session.
-
-    Each question is independent. `question` is fixed for a run by construction --
-    it travels on every request beside the task -- and the state carries only
-    `answer_so_far`, so there is no place for a previous answer to live and
-    nothing to thread between turns.
-
-    A failed request ends that answer, not the session: the error prints and the
-    prompt comes back, because a run costs enough requests that losing the whole
-    session to one timeout is the expensive failure.
-    """
+def repl(
+    client: TypeSafeClient, rng: random.Random, args: argparse.Namespace
+) -> None:
     print(BANNER)
     while True:
         try:
