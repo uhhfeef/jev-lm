@@ -1,4 +1,5 @@
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from typesafe_sdk import TypeSafeClient
@@ -41,6 +42,7 @@ def generate(
     ensemble: int = 3,
     beam_width: int = 1,
     length_penalty: float = 0.7,
+    on_char: Callable[[str], None] | None = None,
 ) -> Run:
     """Run the autoregressive loop until the model stops or the budget is spent.
 
@@ -50,6 +52,12 @@ def generate(
     4. Take the most probable option -> append its character, or stop on STOP.
     5. Record the step and print it unless `quiet`.
     6. Stop on STOP or after `max_chars` steps.
+
+    `on_char` is called with each character the moment it is appended, so a caller
+    can stream the answer out as it is written. It is separate from `quiet`: `quiet`
+    controls the diagnostic line carrying the distribution, `on_char` carries only
+    the character. Beam search takes no callback -- the leading candidate can change
+    after a character would have been printed, so there is nothing honest to stream.
 
     Above `beam_width` 1 this hands off to `beam_search`.
     """
@@ -65,4 +73,5 @@ def generate(
     return greedy_search(
         client, question, rng,
         max_chars=max_chars, quiet=quiet, window=window, ensemble=ensemble,
+        on_char=on_char,
     )

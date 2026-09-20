@@ -9,13 +9,23 @@ Choice options — `a-z`, space, and stopping — and generation is the ordinary
 autoregressive loop: ask, take the most probable option, append, ask again.
 
 ```
-$ jev-lm --question "what is your name" --max-chars 6 --seed 1
+$ jev-lm
+ask a question. blank line to skip, 'exit' or ctrl-c to leave.
+
+you> what is your name
+jev> jev.
+```
+
+The answer arrives one character at a time, because that is how it is written.
+`--verbose` shows the distribution behind each one:
+
+```
+$ jev-lm --question "what is your name" --max-chars 6 --seed 1 --verbose
 "j"        | stop=0.00 | j=0.76 i=0.12 a=0.04 s=0.02 w=0.01
 "je"       | stop=0.00 | e=0.99 v=0.01 STOP=0.00 t=0.00 q=0.00
 "jev"      | stop=0.00 | v=1.00 m=0.00 c=0.00 s=0.00 b=0.00
 "jev."     | stop=0.67 | STOP=0.67 space=0.32 s=0.00 z=0.00 v=0.00
-
-jev.
+jev> jev.
 ```
 
 ## What makes it work
@@ -51,20 +61,26 @@ cp .env.example .env    # then fill in TYPESAFE_API_KEY
 ## Use
 
 ```bash
-jev-lm --question "what is the capital of france"
+jev-lm                                              # a session: ask, answer, repeat
+jev-lm --question "what is the capital of france"   # answer one and exit
 jev-lm --question "largest planet" --beam-width 3
 ```
 
+A session holds one client and one `Random` for its whole life, and each question
+is independent: `question` is fixed for a run by construction and the state carries
+only `answer_so_far`, so there is nothing to thread between turns. `exit`, `quit`,
+ctrl-c or ctrl-d leaves; a failed request ends that answer, not the session.
+
 | flag | default | |
 |---|---|---|
-| `--question` | required | what Jev is answering |
+| `--question` | none | answer one question and exit; omit for a session |
 | `--max-chars` | 60 | character budget |
 | `--window` | 40 | how much of the answer each option shows |
 | `--ensemble` | 3 | shuffled orderings averaged per step; free in requests |
 | `--beam-width` | 1 | candidates kept alive; >1 costs one request per beam per step |
 | `--length-penalty` | 0.7 | beams rank by `logprob / len ** this` |
 | `--seed` | none | reproducible run |
-| `--quiet` | off | print only the answer |
+| `--verbose` | off | print the distribution behind every character |
 
 Decoding is greedy and has no temperature. A question with one correct answer
 gains nothing from variety, and a character-level answer cannot recover from a
@@ -90,10 +106,10 @@ src/jev_lm/
                         and score_step() — one request, one distribution
   generation/
     utils.py            generate() dispatch, Run, Step, trace formatting
-    greedy.py           argmax and the single-path loop
+    greedy.py           argmax and the single-path loop, streamed via on_char
     beam_search.py      Beam and the width-N search
   client.py             build_client() from the environment
-  cli.py                the jev-lm command
+  cli.py                the jev-lm command and the question session
 experiments/            the A/Bs, with their raw results in results/
 archive/                what was tried and cut, with the numbers that closed it
 tests/                  offline; no API calls

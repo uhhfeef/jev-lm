@@ -1,4 +1,5 @@
 import random
+from collections.abc import Callable
 
 from typesafe_sdk import TypeSafeClient
 
@@ -20,6 +21,7 @@ def greedy_search(
     quiet: bool,
     window: int,
     ensemble: int,
+    on_char: Callable[[str], None] | None = None,
 ) -> Run:
     text = ""
     run = Run(text=text, reason="max_chars")
@@ -39,6 +41,8 @@ def greedy_search(
         run.steps.append(
             Step(step, emit, stop_prob, shown, probabilities.get(key, 0.0))
         )
+        if on_char is not None:
+            on_char(emit)
         if not quiet:
             print(f"{quoted(text):<46} | stop={stop_prob:.2f} | {shown}")
 
